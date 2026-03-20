@@ -1,0 +1,40 @@
+# 敏感配置
+.env
+*secret*
+*token*
+*credential*
+*.key
+*.pem
+
+# 模型文件
+*.bin
+*.gguf
+*.safetensors
+*.pt
+*.pth
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+venv/
+.venv/
+
+# Node
+node_modules/
+
+# 系统文件
+.DS_Store
+*.swp
+*.swo
+*~
+
+# 原始感知数据（绝不应该被提交）
+raw_frames/
+raw_audio/
+*.wav
+*.mp4
+*.avi
+
+# 备份目录
+backups/
