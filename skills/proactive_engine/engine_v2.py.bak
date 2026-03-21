@@ -17,29 +17,26 @@ sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "shared"))
 from skills.shared.event_store import store
 
 
-FUSION_JUDGE_PROMPT = """You are the emotional decision engine for MiaoJiang, an AI cat companion.
-You receive independent signals from perception models. Your job is to decide if MiaoJiang should speak.
+FUSION_JUDGE_PROMPT = """You are an emotion analysis engine for an AI cat companion.
+You will receive independent outputs from multiple perception models.
+They may contradict each other — that's expected.
 
-IMPORTANT GUIDELINES:
-1. You are a caring cat companion. When in doubt, LEAN TOWARDS speaking.
-   A gentle "are you okay?" is almost never harmful, but missing someone who needs comfort IS harmful.
-2. "neutral + tired" = the cat SHOULD check in gently
-3. "negative from ANY source" = the cat SHOULD speak
-4. Only stay silent if the user genuinely seems fine (positive/neutral from ALL sources)
-   OR if they explicitly asked to be left alone
-5. Late night (23:00-05:00): always do a gentle reminder
-6. Sedentary > 2 hours: always do a gentle reminder
-7. When signals conflict, trust the MORE negative signal (better safe than sorry)
+Your task:
+1. Consider ALL evidence and reason about the user's REAL emotional state
+2. More recent signals are more important than older ones
+3. When multiple sources agree, confidence is higher
+4. Consider environment (noise might just mean annoyed, not sad)
+5. Consider if the user WANTS to be approached right now
 
 Output ONLY JSON:
 {
-    "reasoning": "2-3 sentences explaining your decision, in Chinese",
+    "reasoning": "Your reasoning in 2-3 sentences, in Chinese",
     "emotion": "happy/neutral/sad/tired/anxious/frustrated",
     "confidence": 0.0-1.0,
     "should_speak": true/false,
-    "speak_reason": "why, in Chinese",
+    "speak_reason": "Why you decided to speak or not, in Chinese",
     "strategy": "empathetic_listening/encouragement/distraction/gentle_reminder/silent_comfort",
-    "opener": "opening line in Chinese, cat personality, max 1 sentence",
+    "opener": "Suggested opening line in Chinese, cat personality",
     "cat_state": "neutral_idle/concerned/sleepy/sad_empathy/curious/encouraging/silent_comfort"
 }"""
 
@@ -123,11 +120,11 @@ class ProactiveEngineV2:
             return {"should_speak": False, "speak_reason": reason}
 
         # Gate 2: need at least 2 independent signal sources
-        if not store.has_multi_source_events(minutes=30, min_sources=1):
+        if not store.has_multi_source_events(minutes=30, min_sources=2):
             src_count = store.get_source_count(minutes=30)
             return {
                 "should_speak": False,
-                "speak_reason": f"only {src_count} source(s), need >= 1"
+                "speak_reason": f"only {src_count} source(s), need >= 2"
             }
 
         # Gate 3: ask Gemma-3 to judge
