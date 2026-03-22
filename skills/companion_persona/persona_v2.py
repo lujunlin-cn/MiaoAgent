@@ -5,11 +5,8 @@ persona_v2.py — 猫咪人格（事件驱动版本）
 import re
 import json
 import requests
-import sys
-from pathlib import Path
 
-sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "shared"))
-from event_store import store
+from skills.shared.event_store import store
 
 CAT_PERSONA = """你是咪酱，一只金渐层英短小猫 AI 伴侣。
 
