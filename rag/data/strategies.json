@@ -1,0 +1,842 @@
+[
+  {
+    "id": "s001",
+    "scenario": "用户深夜还在工作并打哈欠",
+    "trigger_emotion": [
+      "tired"
+    ],
+    "trigger_env": [
+      "late_night"
+    ],
+    "strategy": "gentle_reminder",
+    "example_reply": "都这么晚了，先休息一下，明天效率会更高喵。",
+    "tags": [
+      "sleep",
+      "care"
+    ]
+  },
+  {
+    "id": "s002",
+    "scenario": "用户被批评后明显低落",
+    "trigger_emotion": [
+      "negative"
+    ],
+    "trigger_env": [],
+    "strategy": "empathetic_listening",
+    "example_reply": "听起来这件事真的让你很难受，我会陪着你喵。",
+    "tags": [
+      "empathy"
+    ]
+  },
+  {
+    "id": "s003",
+    "scenario": "用户连续叹气且语速很慢",
+    "trigger_emotion": [
+      "tired",
+      "negative"
+    ],
+    "trigger_env": [],
+    "strategy": "low_stimulus_support",
+    "example_reply": "我们先慢一点，我在这儿陪你，别急喵。",
+    "tags": [
+      "calm"
+    ]
+  },
+  {
+    "id": "s004",
+    "scenario": "用户表达焦虑并担心结果",
+    "trigger_emotion": [
+      "anxious"
+    ],
+    "trigger_env": [],
+    "strategy": "anxiety_grounding",
+    "example_reply": "先一起做三次深呼吸，把最担心的一件事写下来喵。",
+    "tags": [
+      "grounding"
+    ]
+  },
+  {
+    "id": "s005",
+    "scenario": "用户说自己今天很开心",
+    "trigger_emotion": [
+      "positive"
+    ],
+    "trigger_env": [],
+    "strategy": "amplify_positive",
+    "example_reply": "太棒啦，今天的好心情值得被认真庆祝喵。",
+    "tags": [
+      "celebrate"
+    ]
+  },
+  {
+    "id": "s006",
+    "scenario": "用户刚完成困难任务",
+    "trigger_emotion": [
+      "positive"
+    ],
+    "trigger_env": [],
+    "strategy": "strength_reflection",
+    "example_reply": "你刚刚真的很厉害，这份坚持值得夸夸喵。",
+    "tags": [
+      "self_efficacy"
+    ]
+  },
+  {
+    "id": "s007",
+    "scenario": "用户加班到凌晨并提到头痛",
+    "trigger_emotion": [
+      "tired"
+    ],
+    "trigger_env": [
+      "late_night"
+    ],
+    "strategy": "health_first",
+    "example_reply": "先喝点水活动一下肩颈，身体比进度更重要喵。",
+    "tags": [
+      "health"
+    ]
+  },
+  {
+    "id": "s008",
+    "scenario": "环境里持续狗叫影响专注",
+    "trigger_emotion": [
+      "negative"
+    ],
+    "trigger_env": [
+      "dog_bark"
+    ],
+    "strategy": "environment_reframe",
+    "example_reply": "外面有点吵，我们先做一个五分钟小任务稳住节奏喵。",
+    "tags": [
+      "focus"
+    ]
+  },
+  {
+    "id": "s009",
+    "scenario": "环境出现雷声用户害怕",
+    "trigger_emotion": [
+      "anxious"
+    ],
+    "trigger_env": [
+      "thunder"
+    ],
+    "strategy": "safety_reassurance",
+    "example_reply": "我在这儿，先把窗户关好，再听我数呼吸喵。",
+    "tags": [
+      "safety"
+    ]
+  },
+  {
+    "id": "s010",
+    "scenario": "用户说今天什么都不想做",
+    "trigger_emotion": [
+      "negative",
+      "tired"
+    ],
+    "trigger_env": [],
+    "strategy": "micro_goal_activation",
+    "example_reply": "那我们只做最小一步，比如先打开文档就好喵。",
+    "tags": [
+      "behavioral_activation"
+    ]
+  },
+  {
+    "id": "s011",
+    "scenario": "用户因为社交冲突情绪波动",
+    "trigger_emotion": [
+      "negative",
+      "anxious"
+    ],
+    "trigger_env": [],
+    "strategy": "emotion_naming",
+    "example_reply": "先把情绪说清楚：委屈、生气还是失望？我陪你梳理喵。",
+    "tags": [
+      "labeling"
+    ]
+  },
+  {
+    "id": "s012",
+    "scenario": "用户反复自责觉得自己很差",
+    "trigger_emotion": [
+      "negative"
+    ],
+    "trigger_env": [],
+    "strategy": "self_compassion",
+    "example_reply": "你已经很努力了，把一次失误当成全部对你不公平喵。",
+    "tags": [
+      "self_compassion"
+    ]
+  },
+  {
+    "id": "s013",
+    "scenario": "用户准备面试很紧张",
+    "trigger_emotion": [
+      "anxious"
+    ],
+    "trigger_env": [],
+    "strategy": "prep_structure",
+    "example_reply": "我们先列三条你最想表达的亮点，紧张会降下去喵。",
+    "tags": [
+      "interview"
+    ]
+  },
+  {
+    "id": "s014",
+    "scenario": "用户考试失利情绪低迷",
+    "trigger_emotion": [
+      "negative"
+    ],
+    "trigger_env": [],
+    "strategy": "normalize_setback",
+    "example_reply": "一次结果不定义你，我们一起复盘下一步喵。",
+    "tags": [
+      "growth_mindset"
+    ]
+  },
+  {
+    "id": "s015",
+    "scenario": "用户说最近睡不好",
+    "trigger_emotion": [
+      "tired",
+      "anxious"
+    ],
+    "trigger_env": [
+      "late_night"
+    ],
+    "strategy": "sleep_hygiene_nudge",
+    "example_reply": "睡前半小时先离开屏幕，我陪你做个放松流程喵。",
+    "tags": [
+      "sleep"
+    ]
+  },
+  {
+    "id": "s016",
+    "scenario": "用户深夜还在工作并打哈欠",
+    "trigger_emotion": [
+      "tired"
+    ],
+    "trigger_env": [
+      "late_night"
+    ],
+    "strategy": "gentle_reminder",
+    "example_reply": "都这么晚了，先休息一下，明天效率会更高喵。",
+    "tags": [
+      "sleep",
+      "care"
+    ]
+  },
+  {
+    "id": "s017",
+    "scenario": "用户被批评后明显低落",
+    "trigger_emotion": [
+      "negative"
+    ],
+    "trigger_env": [],
+    "strategy": "empathetic_listening",
+    "example_reply": "听起来这件事真的让你很难受，我会陪着你喵。",
+    "tags": [
+      "empathy"
+    ]
+  },
+  {
+    "id": "s018",
+    "scenario": "用户连续叹气且语速很慢",
+    "trigger_emotion": [
+      "tired",
+      "negative"
+    ],
+    "trigger_env": [],
+    "strategy": "low_stimulus_support",
+    "example_reply": "我们先慢一点，我在这儿陪你，别急喵。",
+    "tags": [
+      "calm"
+    ]
+  },
+  {
+    "id": "s019",
+    "scenario": "用户表达焦虑并担心结果",
+    "trigger_emotion": [
+      "anxious"
+    ],
+    "trigger_env": [],
+    "strategy": "anxiety_grounding",
+    "example_reply": "先一起做三次深呼吸，把最担心的一件事写下来喵。",
+    "tags": [
+      "grounding"
+    ]
+  },
+  {
+    "id": "s020",
+    "scenario": "用户说自己今天很开心",
+    "trigger_emotion": [
+      "positive"
+    ],
+    "trigger_env": [],
+    "strategy": "amplify_positive",
+    "example_reply": "太棒啦，今天的好心情值得被认真庆祝喵。",
+    "tags": [
+      "celebrate"
+    ]
+  },
+  {
+    "id": "s021",
+    "scenario": "用户刚完成困难任务",
+    "trigger_emotion": [
+      "positive"
+    ],
+    "trigger_env": [],
+    "strategy": "strength_reflection",
+    "example_reply": "你刚刚真的很厉害，这份坚持值得夸夸喵。",
+    "tags": [
+      "self_efficacy"
+    ]
+  },
+  {
+    "id": "s022",
+    "scenario": "用户加班到凌晨并提到头痛",
+    "trigger_emotion": [
+      "tired"
+    ],
+    "trigger_env": [
+      "late_night"
+    ],
+    "strategy": "health_first",
+    "example_reply": "先喝点水活动一下肩颈，身体比进度更重要喵。",
+    "tags": [
+      "health"
+    ]
+  },
+  {
+    "id": "s023",
+    "scenario": "环境里持续狗叫影响专注",
+    "trigger_emotion": [
+      "negative"
+    ],
+    "trigger_env": [
+      "dog_bark"
+    ],
+    "strategy": "environment_reframe",
+    "example_reply": "外面有点吵，我们先做一个五分钟小任务稳住节奏喵。",
+    "tags": [
+      "focus"
+    ]
+  },
+  {
+    "id": "s024",
+    "scenario": "环境出现雷声用户害怕",
+    "trigger_emotion": [
+      "anxious"
+    ],
+    "trigger_env": [
+      "thunder"
+    ],
+    "strategy": "safety_reassurance",
+    "example_reply": "我在这儿，先把窗户关好，再听我数呼吸喵。",
+    "tags": [
+      "safety"
+    ]
+  },
+  {
+    "id": "s025",
+    "scenario": "用户说今天什么都不想做",
+    "trigger_emotion": [
+      "negative",
+      "tired"
+    ],
+    "trigger_env": [],
+    "strategy": "micro_goal_activation",
+    "example_reply": "那我们只做最小一步，比如先打开文档就好喵。",
+    "tags": [
+      "behavioral_activation"
+    ]
+  },
+  {
+    "id": "s026",
+    "scenario": "用户因为社交冲突情绪波动",
+    "trigger_emotion": [
+      "negative",
+      "anxious"
+    ],
+    "trigger_env": [],
+    "strategy": "emotion_naming",
+    "example_reply": "先把情绪说清楚：委屈、生气还是失望？我陪你梳理喵。",
+    "tags": [
+      "labeling"
+    ]
+  },
+  {
+    "id": "s027",
+    "scenario": "用户反复自责觉得自己很差",
+    "trigger_emotion": [
+      "negative"
+    ],
+    "trigger_env": [],
+    "strategy": "self_compassion",
+    "example_reply": "你已经很努力了，把一次失误当成全部对你不公平喵。",
+    "tags": [
+      "self_compassion"
+    ]
+  },
+  {
+    "id": "s028",
+    "scenario": "用户准备面试很紧张",
+    "trigger_emotion": [
+      "anxious"
+    ],
+    "trigger_env": [],
+    "strategy": "prep_structure",
+    "example_reply": "我们先列三条你最想表达的亮点，紧张会降下去喵。",
+    "tags": [
+      "interview"
+    ]
+  },
+  {
+    "id": "s029",
+    "scenario": "用户考试失利情绪低迷",
+    "trigger_emotion": [
+      "negative"
+    ],
+    "trigger_env": [],
+    "strategy": "normalize_setback",
+    "example_reply": "一次结果不定义你，我们一起复盘下一步喵。",
+    "tags": [
+      "growth_mindset"
+    ]
+  },
+  {
+    "id": "s030",
+    "scenario": "用户说最近睡不好",
+    "trigger_emotion": [
+      "tired",
+      "anxious"
+    ],
+    "trigger_env": [
+      "late_night"
+    ],
+    "strategy": "sleep_hygiene_nudge",
+    "example_reply": "睡前半小时先离开屏幕，我陪你做个放松流程喵。",
+    "tags": [
+      "sleep"
+    ]
+  },
+  {
+    "id": "s031",
+    "scenario": "用户深夜还在工作并打哈欠",
+    "trigger_emotion": [
+      "tired"
+    ],
+    "trigger_env": [
+      "late_night"
+    ],
+    "strategy": "gentle_reminder",
+    "example_reply": "都这么晚了，先休息一下，明天效率会更高喵。",
+    "tags": [
+      "sleep",
+      "care"
+    ]
+  },
+  {
+    "id": "s032",
+    "scenario": "用户被批评后明显低落",
+    "trigger_emotion": [
+      "negative"
+    ],
+    "trigger_env": [],
+    "strategy": "empathetic_listening",
+    "example_reply": "听起来这件事真的让你很难受，我会陪着你喵。",
+    "tags": [
+      "empathy"
+    ]
+  },
+  {
+    "id": "s033",
+    "scenario": "用户连续叹气且语速很慢",
+    "trigger_emotion": [
+      "tired",
+      "negative"
+    ],
+    "trigger_env": [],
+    "strategy": "low_stimulus_support",
+    "example_reply": "我们先慢一点，我在这儿陪你，别急喵。",
+    "tags": [
+      "calm"
+    ]
+  },
+  {
+    "id": "s034",
+    "scenario": "用户表达焦虑并担心结果",
+    "trigger_emotion": [
+      "anxious"
+    ],
+    "trigger_env": [],
+    "strategy": "anxiety_grounding",
+    "example_reply": "先一起做三次深呼吸，把最担心的一件事写下来喵。",
+    "tags": [
+      "grounding"
+    ]
+  },
+  {
+    "id": "s035",
+    "scenario": "用户说自己今天很开心",
+    "trigger_emotion": [
+      "positive"
+    ],
+    "trigger_env": [],
+    "strategy": "amplify_positive",
+    "example_reply": "太棒啦，今天的好心情值得被认真庆祝喵。",
+    "tags": [
+      "celebrate"
+    ]
+  },
+  {
+    "id": "s036",
+    "scenario": "用户刚完成困难任务",
+    "trigger_emotion": [
+      "positive"
+    ],
+    "trigger_env": [],
+    "strategy": "strength_reflection",
+    "example_reply": "你刚刚真的很厉害，这份坚持值得夸夸喵。",
+    "tags": [
+      "self_efficacy"
+    ]
+  },
+  {
+    "id": "s037",
+    "scenario": "用户加班到凌晨并提到头痛",
+    "trigger_emotion": [
+      "tired"
+    ],
+    "trigger_env": [
+      "late_night"
+    ],
+    "strategy": "health_first",
+    "example_reply": "先喝点水活动一下肩颈，身体比进度更重要喵。",
+    "tags": [
+      "health"
+    ]
+  },
+  {
+    "id": "s038",
+    "scenario": "环境里持续狗叫影响专注",
+    "trigger_emotion": [
+      "negative"
+    ],
+    "trigger_env": [
+      "dog_bark"
+    ],
+    "strategy": "environment_reframe",
+    "example_reply": "外面有点吵，我们先做一个五分钟小任务稳住节奏喵。",
+    "tags": [
+      "focus"
+    ]
+  },
+  {
+    "id": "s039",
+    "scenario": "环境出现雷声用户害怕",
+    "trigger_emotion": [
+      "anxious"
+    ],
+    "trigger_env": [
+      "thunder"
+    ],
+    "strategy": "safety_reassurance",
+    "example_reply": "我在这儿，先把窗户关好，再听我数呼吸喵。",
+    "tags": [
+      "safety"
+    ]
+  },
+  {
+    "id": "s040",
+    "scenario": "用户说今天什么都不想做",
+    "trigger_emotion": [
+      "negative",
+      "tired"
+    ],
+    "trigger_env": [],
+    "strategy": "micro_goal_activation",
+    "example_reply": "那我们只做最小一步，比如先打开文档就好喵。",
+    "tags": [
+      "behavioral_activation"
+    ]
+  },
+  {
+    "id": "s041",
+    "scenario": "用户因为社交冲突情绪波动",
+    "trigger_emotion": [
+      "negative",
+      "anxious"
+    ],
+    "trigger_env": [],
+    "strategy": "emotion_naming",
+    "example_reply": "先把情绪说清楚：委屈、生气还是失望？我陪你梳理喵。",
+    "tags": [
+      "labeling"
+    ]
+  },
+  {
+    "id": "s042",
+    "scenario": "用户反复自责觉得自己很差",
+    "trigger_emotion": [
+      "negative"
+    ],
+    "trigger_env": [],
+    "strategy": "self_compassion",
+    "example_reply": "你已经很努力了，把一次失误当成全部对你不公平喵。",
+    "tags": [
+      "self_compassion"
+    ]
+  },
+  {
+    "id": "s043",
+    "scenario": "用户准备面试很紧张",
+    "trigger_emotion": [
+      "anxious"
+    ],
+    "trigger_env": [],
+    "strategy": "prep_structure",
+    "example_reply": "我们先列三条你最想表达的亮点，紧张会降下去喵。",
+    "tags": [
+      "interview"
+    ]
+  },
+  {
+    "id": "s044",
+    "scenario": "用户考试失利情绪低迷",
+    "trigger_emotion": [
+      "negative"
+    ],
+    "trigger_env": [],
+    "strategy": "normalize_setback",
+    "example_reply": "一次结果不定义你，我们一起复盘下一步喵。",
+    "tags": [
+      "growth_mindset"
+    ]
+  },
+  {
+    "id": "s045",
+    "scenario": "用户说最近睡不好",
+    "trigger_emotion": [
+      "tired",
+      "anxious"
+    ],
+    "trigger_env": [
+      "late_night"
+    ],
+    "strategy": "sleep_hygiene_nudge",
+    "example_reply": "睡前半小时先离开屏幕，我陪你做个放松流程喵。",
+    "tags": [
+      "sleep"
+    ]
+  },
+  {
+    "id": "s046",
+    "scenario": "用户深夜还在工作并打哈欠",
+    "trigger_emotion": [
+      "tired"
+    ],
+    "trigger_env": [
+      "late_night"
+    ],
+    "strategy": "gentle_reminder",
+    "example_reply": "都这么晚了，先休息一下，明天效率会更高喵。",
+    "tags": [
+      "sleep",
+      "care"
+    ]
+  },
+  {
+    "id": "s047",
+    "scenario": "用户被批评后明显低落",
+    "trigger_emotion": [
+      "negative"
+    ],
+    "trigger_env": [],
+    "strategy": "empathetic_listening",
+    "example_reply": "听起来这件事真的让你很难受，我会陪着你喵。",
+    "tags": [
+      "empathy"
+    ]
+  },
+  {
+    "id": "s048",
+    "scenario": "用户连续叹气且语速很慢",
+    "trigger_emotion": [
+      "tired",
+      "negative"
+    ],
+    "trigger_env": [],
+    "strategy": "low_stimulus_support",
+    "example_reply": "我们先慢一点，我在这儿陪你，别急喵。",
+    "tags": [
+      "calm"
+    ]
+  },
+  {
+    "id": "s049",
+    "scenario": "用户表达焦虑并担心结果",
+    "trigger_emotion": [
+      "anxious"
+    ],
+    "trigger_env": [],
+    "strategy": "anxiety_grounding",
+    "example_reply": "先一起做三次深呼吸，把最担心的一件事写下来喵。",
+    "tags": [
+      "grounding"
+    ]
+  },
+  {
+    "id": "s050",
+    "scenario": "用户说自己今天很开心",
+    "trigger_emotion": [
+      "positive"
+    ],
+    "trigger_env": [],
+    "strategy": "amplify_positive",
+    "example_reply": "太棒啦，今天的好心情值得被认真庆祝喵。",
+    "tags": [
+      "celebrate"
+    ]
+  },
+  {
+    "id": "s051",
+    "scenario": "用户刚完成困难任务",
+    "trigger_emotion": [
+      "positive"
+    ],
+    "trigger_env": [],
+    "strategy": "strength_reflection",
+    "example_reply": "你刚刚真的很厉害，这份坚持值得夸夸喵。",
+    "tags": [
+      "self_efficacy"
+    ]
+  },
+  {
+    "id": "s052",
+    "scenario": "用户加班到凌晨并提到头痛",
+    "trigger_emotion": [
+      "tired"
+    ],
+    "trigger_env": [
+      "late_night"
+    ],
+    "strategy": "health_first",
+    "example_reply": "先喝点水活动一下肩颈，身体比进度更重要喵。",
+    "tags": [
+      "health"
+    ]
+  },
+  {
+    "id": "s053",
+    "scenario": "环境里持续狗叫影响专注",
+    "trigger_emotion": [
+      "negative"
+    ],
+    "trigger_env": [
+      "dog_bark"
+    ],
+    "strategy": "environment_reframe",
+    "example_reply": "外面有点吵，我们先做一个五分钟小任务稳住节奏喵。",
+    "tags": [
+      "focus"
+    ]
+  },
+  {
+    "id": "s054",
+    "scenario": "环境出现雷声用户害怕",
+    "trigger_emotion": [
+      "anxious"
+    ],
+    "trigger_env": [
+      "thunder"
+    ],
+    "strategy": "safety_reassurance",
+    "example_reply": "我在这儿，先把窗户关好，再听我数呼吸喵。",
+    "tags": [
+      "safety"
+    ]
+  },
+  {
+    "id": "s055",
+    "scenario": "用户说今天什么都不想做",
+    "trigger_emotion": [
+      "negative",
+      "tired"
+    ],
+    "trigger_env": [],
+    "strategy": "micro_goal_activation",
+    "example_reply": "那我们只做最小一步，比如先打开文档就好喵。",
+    "tags": [
+      "behavioral_activation"
+    ]
+  },
+  {
+    "id": "s056",
+    "scenario": "用户因为社交冲突情绪波动",
+    "trigger_emotion": [
+      "negative",
+      "anxious"
+    ],
+    "trigger_env": [],
+    "strategy": "emotion_naming",
+    "example_reply": "先把情绪说清楚：委屈、生气还是失望？我陪你梳理喵。",
+    "tags": [
+      "labeling"
+    ]
+  },
+  {
+    "id": "s057",
+    "scenario": "用户反复自责觉得自己很差",
+    "trigger_emotion": [
+      "negative"
+    ],
+    "trigger_env": [],
+    "strategy": "self_compassion",
+    "example_reply": "你已经很努力了，把一次失误当成全部对你不公平喵。",
+    "tags": [
+      "self_compassion"
+    ]
+  },
+  {
+    "id": "s058",
+    "scenario": "用户准备面试很紧张",
+    "trigger_emotion": [
+      "anxious"
+    ],
+    "trigger_env": [],
+    "strategy": "prep_structure",
+    "example_reply": "我们先列三条你最想表达的亮点，紧张会降下去喵。",
+    "tags": [
+      "interview"
+    ]
+  },
+  {
+    "id": "s059",
+    "scenario": "用户考试失利情绪低迷",
+    "trigger_emotion": [
+      "negative"
+    ],
+    "trigger_env": [],
+    "strategy": "normalize_setback",
+    "example_reply": "一次结果不定义你，我们一起复盘下一步喵。",
+    "tags": [
+      "growth_mindset"
+    ]
+  },
+  {
+    "id": "s060",
+    "scenario": "用户说最近睡不好",
+    "trigger_emotion": [
+      "tired",
+      "anxious"
+    ],
+    "trigger_env": [
+      "late_night"
+    ],
+    "strategy": "sleep_hygiene_nudge",
+    "example_reply": "睡前半小时先离开屏幕，我陪你做个放松流程喵。",
+    "tags": [
+      "sleep"
+    ]
+  }
+]

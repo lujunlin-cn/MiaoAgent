@@ -6,8 +6,10 @@ torch                     # transformers 依赖（CPU版即可）
 sentencepiece             # tokenizer 依赖
 
 # === 音频 (邱靖翔负责) ===
-# funasr                  # emotion2vec 语音情绪
-# panns-inference         # 环境音分类
+funasr                   # emotion2vec 语音情绪
+modelscope               # emotion2vec 模型下载/管理
+panns-inference          # 环境音分类
+torchaudio               # PANNs 音频加载依赖
 openai-whisper            # 语音转文字
 
 # === TTS (陈昕博负责) ===
@@ -21,5 +23,5 @@ requests>=2.31.0
 flask>=3.0.0
 
 # === RAG (邱靖翔负责) ===
-# chromadb>=0.4.0
-# sentence-transformers>=2.2.0
+chromadb>=0.4.0
+sentence-transformers>=2.2.0
