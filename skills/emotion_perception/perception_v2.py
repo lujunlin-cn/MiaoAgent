@@ -154,7 +154,7 @@ class TextSentimentAnalyzer:
                 # 备选：uer/roberta-base-finetuned-jd-binary-chinese
                 self._pipeline = pipeline(
                     "sentiment-analysis",
-                    model="lxyuan/distilbert-base-multilingual-cased-sentiments-student",
+                    model="/home/hajimi2025/distilbert-sentiment",
                     device=-1  # 强制 CPU
                 )
                 print("[TextSentiment] model loaded (CPU)")
