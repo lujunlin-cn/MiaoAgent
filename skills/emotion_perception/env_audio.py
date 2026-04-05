@@ -1,3 +1,5 @@
+import os
+PROJECT_ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 """
 env_audio.py - Environment audio classification for v3 architecture.
 
@@ -62,8 +64,8 @@ class EnvAudioDetector:
         "children_playing",
     }
 
-    LOCAL_PANNS_CKPT = "/opt/catagent/models/panns/Cnn14_mAP=0.431.pth"
-    LOCAL_URBAN_SOUND_MODEL = "/opt/catagent/models/urbansound8k_ecapa"
+    LOCAL_PANNS_CKPT = os.path.join(PROJECT_ROOT, "models", "panns", "Cnn14_mAP=0.431.pth")
+    LOCAL_URBAN_SOUND_MODEL = os.path.join(PROJECT_ROOT, "models", "urbansound8k_ecapa")
 
     def __init__(self, min_confidence: float = 0.45, emit_cooldown_sec: float = 8.0):
         self.min_confidence = min_confidence

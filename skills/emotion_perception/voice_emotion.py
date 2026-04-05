@@ -1,3 +1,5 @@
+import os
+PROJECT_ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 """
 voice_emotion.py - Voice emotion perception for v3 architecture.
 
@@ -123,8 +125,8 @@ class VoiceEmotionDetector:
     }
 
     LOCAL_MODEL_CANDIDATES = [
-        "/opt/catagent/models/emotion2vec_plus_large",
-        "/opt/catagent/models/emotion2vec_base",
+        os.path.join(PROJECT_ROOT, "models", "emotion2vec_plus_large"),
+        os.path.join(PROJECT_ROOT, "models", "emotion2vec_base"),
     ]
 
     def __init__(

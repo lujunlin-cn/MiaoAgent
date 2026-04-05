@@ -3,14 +3,15 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CatAgent - 你的像素金渐层</title>
+    <title>MiaoAgent - 你的像素金渐层</title>
     <style>
         :root {
-            --bg-color: #fdf6ec;      
-            --primary-color: #ffb347; 
-            --bubble-user: #e1f5fe;   
-            --bubble-cat: #ffffff;    
-            --text-color: #5d4037;    
+            --bg-color: #fdf6ec;
+            --primary-color: #ffb347;
+            --bubble-user: #e1f5fe;
+            --bubble-cat: #ffffff;
+            --bubble-system: #fff3e0;
+            --text-color: #5d4037;
         }
 
         body {
@@ -22,15 +23,15 @@
             align-items: center;
             height: 100vh;
             margin: 0;
-            padding: 20px;
+            padding: 15px;
             box-sizing: border-box;
         }
 
-        #cat-container { position: relative; margin-bottom: 20px; transition: transform 0.3s; }
+        #cat-container { position: relative; margin-bottom: 10px; transition: transform 0.3s; }
         #cat-container:hover { transform: scale(1.05); }
 
         #cat-display {
-            width: 280px;
+            width: 250px;
             height: auto;
             border-radius: 20px;
             box-shadow: 0 8px 20px rgba(0,0,0,0.1);
@@ -38,6 +39,29 @@
             padding: 10px;
             transition: opacity 0.4s ease-in-out;
         }
+
+        /* 状态栏 */
+        #status-bar {
+            font-size: 12px;
+            color: #999;
+            text-align: center;
+            margin-bottom: 8px;
+            display: flex;
+            gap: 12px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+        #status-bar span.val { color: var(--text-color); font-weight: 600; }
+        #camera-toggle {
+            background: none; border: 1px solid #ccc; border-radius: 12px;
+            padding: 2px 10px; font-size: 12px; cursor: pointer; color: #999;
+        }
+        #camera-toggle.on { border-color: #4caf50; color: #4caf50; }
+        #memory-clear-btn {
+            background: none; border: 1px solid #ccc; border-radius: 12px;
+            padding: 2px 10px; font-size: 12px; cursor: pointer; color: #e57373;
+        }
+        #memory-clear-btn:hover { border-color: #e57373; background: #fff5f5; }
 
         #history {
             width: 100%;
@@ -47,41 +71,55 @@
             border-radius: 25px;
             padding: 20px;
             overflow-y: auto;
-            margin-bottom: 20px;
+            margin-bottom: 10px;
             border: 2px dashed var(--primary-color);
             box-sizing: border-box;
         }
 
-        .msg { margin-bottom: 15px; padding: 10px 15px; border-radius: 18px; max-width: 80%; line-height: 1.5; word-wrap: break-word;}
+        .msg { margin-bottom: 15px; padding: 10px 15px; border-radius: 18px; max-width: 80%; line-height: 1.5; word-wrap: break-word; }
         .user-msg { background: var(--bubble-user); align-self: flex-end; margin-left: auto; border-bottom-right-radius: 2px; }
         .cat-msg { background: var(--bubble-cat); align-self: flex-start; border-bottom-left-radius: 2px; }
+        .system-msg { background: var(--bubble-system); align-self: center; margin: 0 auto; font-size: 12px; color: #999; text-align: center; border-radius: 12px; }
 
-        .controls { width: 100%; max-width: 500px; display: flex; gap: 10px; box-sizing: border-box;}
+        .controls { width: 100%; max-width: 500px; display: flex; gap: 10px; box-sizing: border-box; }
 
         input { flex-grow: 1; border-radius: 20px; border: 2px solid var(--primary-color); padding: 10px 20px; outline: none; font-size: 16px; }
 
         button {
             background: var(--primary-color);
-            border: none;
-            color: white;
-            padding: 10px 20px;
-            border-radius: 20px;
-            cursor: pointer;
-            font-weight: bold;
+            border: none; color: white;
+            padding: 10px 20px; border-radius: 20px;
+            cursor: pointer; font-weight: bold;
             transition: background 0.3s, transform 0.1s;
             user-select: none;
         }
-
         button:active { transform: scale(0.95); }
         button:hover:not(:disabled) { background: #ffa000; }
         button:disabled { background: #cccccc; cursor: not-allowed; transform: none; }
-        .record-btn { background: #ff8a80; } 
+        .record-btn { background: #ff8a80; }
+
+        /* 主动对话动画 */
+        @keyframes proactive-glow {
+            0% { box-shadow: 0 0 5px rgba(255,179,71,0.3); }
+            50% { box-shadow: 0 0 20px rgba(255,179,71,0.6); }
+            100% { box-shadow: 0 0 5px rgba(255,179,71,0.3); }
+        }
+        .proactive-highlight { animation: proactive-glow 1.5s ease-in-out; }
     </style>
 </head>
 <body>
 
     <div id="cat-container">
-        <img id="cat-display" src="/static/cat_images/neutral_idle.png" alt="CatAgent">
+        <img id="cat-display" src="/static/cat_images/neutral_idle.png" alt="MiaoAgent">
+    </div>
+
+    <!-- 感知状态栏 -->
+    <div id="status-bar">
+        <span>😸 <span class="val" id="cat-mood">neutral_idle</span></span>
+        <span>📡 <span class="val" id="signal-count">0</span> 个信号</span>
+        <span>🧠 <span class="val" id="memory-count">0</span> 条记忆</span>
+        <button id="memory-clear-btn" onclick="clearMemory()" title="清空所有记忆">🗑️ 清除</button>
+        <button id="camera-toggle" onclick="toggleCamera()">📷 摄像头关</button>
     </div>
 
     <div id="history">
@@ -97,8 +135,92 @@
     <script>
         let mediaRecorder;
         let audioChunks = [];
-        let isRecording = false; 
+        let isRecording = false;
 
+        // ========== SSE 接收主动对话 ==========
+        const evtSource = new EventSource('/events/stream');
+        evtSource.onmessage = function(event) {
+            const data = JSON.parse(event.data);
+            if (data.type === 'proactive') {
+                // 猫咪主动说话！
+                const container = document.getElementById('cat-container');
+                container.classList.add('proactive-highlight');
+                setTimeout(() => container.classList.remove('proactive-highlight'), 1500);
+                addMessage('💭 咪酱主动找你说话了：', 'system-msg');
+                updateCat(data.reply, data.emotion, data.audio);
+            } else if (data.type === 'event') {
+                // 感知事件通知（更新状态栏）
+                refreshStatus();
+            }
+        };
+        evtSource.onerror = function() {
+            console.warn('SSE 连接断开，5 秒后重连...');
+        };
+
+        // ========== 状态栏轮询 ==========
+        async function refreshStatus() {
+            try {
+                const resp = await fetch('/status');
+                const data = await resp.json();
+                document.getElementById('cat-mood').innerText = data.cat_state || 'neutral_idle';
+                document.getElementById('signal-count').innerText = data.total_events || 0;
+                document.getElementById('memory-count').innerText = data.memory_count || 0;
+                const camBtn = document.getElementById('camera-toggle');
+                if (data.camera) {
+                    camBtn.innerText = '📷 摄像头开';
+                    camBtn.classList.add('on');
+                } else {
+                    camBtn.innerText = '📷 摄像头关';
+                    camBtn.classList.remove('on');
+                }
+            } catch (e) {}
+        }
+        setInterval(refreshStatus, 10000);
+        refreshStatus();
+
+        // ========== 摄像头开关 ==========
+        async function toggleCamera() {
+            try {
+                const resp = await fetch('/camera/toggle', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({action: 'toggle'})
+                });
+                const data = await resp.json();
+                refreshStatus();
+                addMessage(`📷 摄像头已${data.camera === 'on' ? '开启' : '关闭'}`, 'system-msg');
+            } catch (e) {
+                addMessage('摄像头控制失败', 'system-msg');
+            }
+        }
+
+        // ========== 记忆清除 ==========
+        async function clearMemory() {
+            if (!confirm('确定要清空所有记忆吗？（包括短期事件、长期记忆和对话历史）')) return;
+            const btn = document.getElementById('memory-clear-btn');
+            btn.disabled = true;
+            btn.innerText = '清除中...';
+            try {
+                const resp = await fetch('/memory/clear', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({target: 'all'})
+                });
+                const data = await resp.json();
+                if (data.status === 'ok') {
+                    addMessage('🗑️ 记忆已全部清空喵~', 'system-msg');
+                } else {
+                    addMessage('清除失败: ' + JSON.stringify(data), 'system-msg');
+                }
+                refreshStatus();
+            } catch (e) {
+                addMessage('清除请求失败', 'system-msg');
+            }
+            btn.disabled = false;
+            btn.innerText = '🗑️ 清除';
+        }
+
+        // ========== 发送消息 ==========
         function handleKeyPress(e) { if (e.key === 'Enter') sendMessage(); }
 
         async function sendMessage() {
@@ -116,18 +238,18 @@
                     body: JSON.stringify({message: text})
                 });
                 const data = await response.json();
-                updateCat(data.reply, data.emotion);
+                updateCat(data.reply, data.emotion, data.audio);
+                refreshStatus();
             } catch (err) {
                 addMessage("通信失败，请检查后端运行状态。", 'cat-msg');
             }
         }
 
-        // 核心修复：更严谨的录音状态机
+        // ========== 录音 ==========
         async function toggleRecording() {
             const btn = document.getElementById('recordBtn');
 
             if (!isRecording) {
-                // === 开始录音 ===
                 btn.disabled = true;
                 btn.innerText = "准备中...";
                 btn.style.background = "#ccc";
@@ -142,11 +264,10 @@
                     };
 
                     mediaRecorder.onstop = async () => {
-                        // 录音停止后的回调逻辑（锁定UI -> 上传 -> 恢复UI）
                         btn.disabled = true;
                         btn.innerText = "正在上传...";
                         btn.style.background = "#ccc";
-                        
+
                         addMessage("🎤 正在发送语音...", "user-msg");
 
                         const audioBlob = new Blob(audioChunks, { type: 'audio/wav' });
@@ -156,52 +277,63 @@
                         try {
                             const response = await fetch('/upload_voice', { method: 'POST', body: formData });
                             const data = await response.json();
-                            updateCat(data.reply, data.emotion);
+                            if (data.recognized_text) {
+                                addMessage(`🗣️ 识别结果：${data.recognized_text}`, 'system-msg');
+                            }
+                            updateCat(data.reply, data.emotion, data.audio);
+                            refreshStatus();
                         } catch (err) {
                             addMessage("语音上传失败，后端接口没有响应喵。", 'cat-msg');
                         }
-                        
-                        // 释放麦克风权限并恢复按钮状态
+
                         stream.getTracks().forEach(track => track.stop());
                         isRecording = false;
                         btn.disabled = false;
                         btn.innerText = "点击录音";
-                        btn.style.background = "#ff8a80"; 
+                        btn.style.background = "#ff8a80";
                     };
 
                     mediaRecorder.start();
                     isRecording = true;
                     btn.disabled = false;
                     btn.innerText = "录音中... (点击发送)";
-                    btn.style.background = "#ff5252"; 
+                    btn.style.background = "#ff5252";
                 } catch (err) {
-                    alert("无法调用麦克风！请确保网址是 http://127.0.0.1:5000 且允许了权限。");
+                    alert("无法调用麦克风！请确保网址是 http://127.0.0.1:5000 且允许了权限。\n\n远程访问请用：ssh -L 5000:127.0.0.1:5000 用户名@服务器IP");
                     btn.disabled = false;
                     btn.innerText = "点击录音";
                     btn.style.background = "#ff8a80";
                 }
             } else {
-                // === 停止录音 ===
                 if (mediaRecorder && mediaRecorder.state !== "inactive") {
-                    mediaRecorder.stop(); // 这一句会触发上面的 onstop 逻辑
+                    mediaRecorder.stop();
                 }
             }
         }
 
+        // ========== 工具函数 ==========
         function addMessage(text, type) {
             const history = document.getElementById('history');
             history.innerHTML += `<div class="msg ${type}">${text}</div>`;
             history.scrollTop = history.scrollHeight;
         }
 
-        function updateCat(reply, emotion) {
+        function updateCat(reply, emotion, audio) {
             if (reply) addMessage(reply, 'cat-msg');
             const catImg = document.getElementById('cat-display');
-            catImg.style.opacity = 0; 
+            catImg.style.opacity = 0;
             setTimeout(() => {
                 catImg.src = `/static/cat_images/${emotion}.png`;
-                catImg.style.opacity = 1; 
+                catImg.onerror = function() { this.src = '/static/cat_images/neutral_idle.png'; };
+                catImg.style.opacity = 1;
             }, 400);
+            // 更新状态栏
+            document.getElementById('cat-mood').innerText = emotion;
+            // 播放 TTS 音频
+            if (audio) {
+                const audioFile = audio.split('/').pop();
+                new Audio(`/tts/${audioFile}`).play().catch(() => {});
+            }
         }
     </script>
 </body>

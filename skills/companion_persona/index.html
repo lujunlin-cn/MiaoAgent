@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CatAgent - 你的像素金渐层</title>
+    <style>
+        :root {
+            --bg-color: #fdf6ec;      
+            --primary-color: #ffb347; 
+            --bubble-user: #e1f5fe;   
+            --bubble-cat: #ffffff;    
+            --text-color: #5d4037;    
+        }
+
+        body {
+            background-color: var(--bg-color);
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            color: var(--text-color);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            padding: 20px;
+            box-sizing: border-box;
+        }
+
+        #cat-container { position: relative; margin-bottom: 20px; transition: transform 0.3s; }
+        #cat-container:hover { transform: scale(1.05); }
+
+        #cat-display {
+            width: 280px;
+            height: auto;
+            border-radius: 20px;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.1);
+            background: white;
+            padding: 10px;
+            transition: opacity 0.4s ease-in-out;
+        }
+
+        #history {
+            width: 100%;
+            max-width: 500px;
+            flex-grow: 1;
+            background: rgba(255, 255, 255, 0.6);
+            border-radius: 25px;
+            padding: 20px;
+            overflow-y: auto;
+            margin-bottom: 20px;
+            border: 2px dashed var(--primary-color);
+            box-sizing: border-box;
+        }
+
+        .msg { margin-bottom: 15px; padding: 10px 15px; border-radius: 18px; max-width: 80%; line-height: 1.5; word-wrap: break-word;}
+        .user-msg { background: var(--bubble-user); align-self: flex-end; margin-left: auto; border-bottom-right-radius: 2px; }
+        .cat-msg { background: var(--bubble-cat); align-self: flex-start; border-bottom-left-radius: 2px; }
+
+        .controls { width: 100%; max-width: 500px; display: flex; gap: 10px; box-sizing: border-box;}
+
+        input { flex-grow: 1; border-radius: 20px; border: 2px solid var(--primary-color); padding: 10px 20px; outline: none; font-size: 16px; }
+
+        button {
+            background: var(--primary-color);
+            border: none;
+            color: white;
+            padding: 10px 20px;
+            border-radius: 20px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: background 0.3s, transform 0.1s;
+            user-select: none;
+        }
+
+        button:active { transform: scale(0.95); }
+        button:hover:not(:disabled) { background: #ffa000; }
+        button:disabled { background: #cccccc; cursor: not-allowed; transform: none; }
+        .record-btn { background: #ff8a80; } 
+    </style>
+</head>
+<body>
+
+    <div id="cat-container">
+        <img id="cat-display" src="/static/cat_images/neutral_idle.png" alt="CatAgent">
+    </div>
+
+    <div id="history">
+        <div class="msg cat-msg">喵？你回来啦！刚才我一直在等你呢。</div>
+    </div>
+
+    <div class="controls">
+        <input type="text" id="userInput" placeholder="跟小猫说说话..." onkeypress="handleKeyPress(event)">
+        <button onclick="sendMessage()" id="sendBtn">发送</button>
+        <button class="record-btn" id="recordBtn" onclick="toggleRecording()">点击录音</button>
+    </div>
+
+    <script>
+        let mediaRecorder;
+        let audioChunks = [];
+        let isRecording = false; 
+
+        function handleKeyPress(e) { if (e.key === 'Enter') sendMessage(); }
+
+        async function sendMessage() {
+            const input = document.getElementById('userInput');
+            const text = input.value.trim();
+            if (!text) return;
+
+            addMessage(text, 'user-msg');
+            input.value = '';
+
+            try {
+                const response = await fetch('/chat', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({message: text})
+                });
+                const data = await response.json();
+                updateCat(data.reply, data.emotion, data.audio);
+            } catch (err) {
+                addMessage("通信失败，请检查后端运行状态。", 'cat-msg');
+            }
+        }
+
+        // 核心修复：更严谨的录音状态机
+        async function toggleRecording() {
+            const btn = document.getElementById('recordBtn');
+
+            if (!isRecording) {
+                // === 开始录音 ===
+                btn.disabled = true;
+                btn.innerText = "准备中...";
+                btn.style.background = "#ccc";
+
+                try {
+                    const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+                    mediaRecorder = new MediaRecorder(stream);
+                    audioChunks = [];
+
+                    mediaRecorder.ondataavailable = event => {
+                        if (event.data.size > 0) audioChunks.push(event.data);
+                    };
+
+                    mediaRecorder.onstop = async () => {
+                        // 录音停止后的回调逻辑（锁定UI -> 上传 -> 恢复UI）
+                        btn.disabled = true;
+                        btn.innerText = "正在上传...";
+                        btn.style.background = "#ccc";
+                        
+                        addMessage("🎤 正在发送语音...", "user-msg");
+
+                        const audioBlob = new Blob(audioChunks, { type: 'audio/wav' });
+                        const formData = new FormData();
+                        formData.append("voice", audioBlob, "user_voice.wav");
+
+                        try {
+                            const response = await fetch('/upload_voice', { method: 'POST', body: formData });
+                            const data = await response.json();
+                            updateCat(data.reply, data.emotion, data.audio);
+                        } catch (err) {
+                            addMessage("语音上传失败，后端接口没有响应喵。", 'cat-msg');
+                        }
+                        
+                        // 释放麦克风权限并恢复按钮状态
+                        stream.getTracks().forEach(track => track.stop());
+                        isRecording = false;
+                        btn.disabled = false;
+                        btn.innerText = "点击录音";
+                        btn.style.background = "#ff8a80"; 
+                    };
+
+                    mediaRecorder.start();
+                    isRecording = true;
+                    btn.disabled = false;
+                    btn.innerText = "录音中... (点击发送)";
+                    btn.style.background = "#ff5252"; 
+                } catch (err) {
+                    alert("无法调用麦克风！请确保网址是 http://127.0.0.1:5000 且允许了权限。");
+                    btn.disabled = false;
+                    btn.innerText = "点击录音";
+                    btn.style.background = "#ff8a80";
+                }
+            } else {
+                // === 停止录音 ===
+                if (mediaRecorder && mediaRecorder.state !== "inactive") {
+                    mediaRecorder.stop(); // 这一句会触发上面的 onstop 逻辑
+                }
+            }
+        }
+
+        function addMessage(text, type) {
+            const history = document.getElementById('history');
+            history.innerHTML += `<div class="msg ${type}">${text}</div>`;
+            history.scrollTop = history.scrollHeight;
+        }
+
+        function updateCat(reply, emotion, audio) {
+            if (reply) addMessage(reply, 'cat-msg');
+            const catImg = document.getElementById('cat-display');
+            catImg.style.opacity = 0; 
+            setTimeout(() => {
+                catImg.src = `/static/cat_images/${emotion}.png`;
+                catImg.style.opacity = 1; 
+            }, 400);
+            // 播放 TTS 音频
+            if (audio) {
+                const audioFile = audio.split('/').pop();
+                new Audio(`/tts/${audioFile}`).play().catch(() => {
+                    console.warn('TTS 音频播放失败');
+                });
+            }
+        }
+    </script>
+</body>
+</html>

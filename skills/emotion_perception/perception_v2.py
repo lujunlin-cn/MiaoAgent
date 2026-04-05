@@ -9,7 +9,9 @@ perception_v2.py — 轻量感知引擎（架构更新版）
 这样 Gemma-3 的调用频率从每10秒降到每3分钟，并发冲突消除
 """
 import cv2
+import os
 import time
+PROJECT_ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 import threading
 import numpy as np
 
@@ -154,7 +156,7 @@ class TextSentimentAnalyzer:
                 # 备选：uer/roberta-base-finetuned-jd-binary-chinese
                 self._pipeline = pipeline(
                     "sentiment-analysis",
-                    model="/home/hajimi2025/distilbert-sentiment",
+                    model=os.path.join(PROJECT_ROOT, "models", "distilbert-sentiment"),
                     device=-1  # 强制 CPU
                 )
                 print("[TextSentiment] model loaded (CPU)")

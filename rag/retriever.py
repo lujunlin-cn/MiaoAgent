@@ -76,7 +76,24 @@ class StrategyRetriever:
         if not scene_desc.strip():
             return []
 
-        emb = self._get_model().encode([scene_desc], normalize_embeddings=True).tolist()[0]
+        model = self._get_model()
+        # Prefer using a query prompt for BGE-like encoders to improve retrieval quality.
+        # If the encoder implementation does not accept a `prompt` argument, fall back.
+        try:
+            emb = (
+                model.encode(
+                    [scene_desc],
+                    prompt="为这个句子生成表示以用于检索相关段落：",
+                    normalize_embeddings=True,
+                )
+                .tolist()[0]
+            )
+        except TypeError:
+            # Some SentenceTransformer wrappers don't accept `prompt` kwarg
+            emb = model.encode([scene_desc], normalize_embeddings=True).tolist()[0]
+        except Exception as e:
+            print(f"[RAG] query encode with prompt failed: {e}")
+            emb = model.encode([scene_desc], normalize_embeddings=True).tolist()[0]
         # Pull extra rows first, then de-duplicate to return cleaner top-k results.
         query_size = max(1, top_k * 4)
         result = self._collection.query(

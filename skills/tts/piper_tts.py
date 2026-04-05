@@ -16,9 +16,17 @@ import threading
 
 class PiperTTS:
     def __init__(self, 
-                 model_path="/opt/catagent/models/piper/zh_CN-huayan-medium.onnx",
+                 model_path=None,
                  output_dir="/tmp/miaoagent_tts",
                  auto_play=False):
+        # 默认模型路径
+        if model_path is None:
+            _root = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+            model_path = os.path.join(_root, "models", "piper", "zh_CN-huayan-medium.onnx")
+        # 默认模型路径
+        if model_path is None:
+            _root = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+            model_path = os.path.join(_root, "models", "piper", "zh_CN-huayan-medium.onnx")
         self.model_path = model_path
         self.output_dir = output_dir
         self.auto_play = auto_play
