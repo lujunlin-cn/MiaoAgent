@@ -1,5 +1,5 @@
 """
-Download required pretrained models into /opt/catagent/models.
+Download required pretrained models into <PROJECT_ROOT>/models.
 
 Usage:
   python3 models/download_pretrained_models.py
