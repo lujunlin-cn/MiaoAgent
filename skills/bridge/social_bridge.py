@@ -63,8 +63,12 @@ def _quick_emotion(text: str) -> str:
 def _analyze_emotion_deep(text: str) -> dict:
     """深度情绪分析（使用 DistilBERT，如果可用）"""
     try:
-        from skills.emotion_perception.perception_v2 import analyze_text_emotion
-        return analyze_text_emotion(text)
+        from skills.emotion_perception.perception_v2 import TextSentimentAnalyzer
+        _cached = getattr(_analyze_emotion_deep, "_analyzer", None)
+        if _cached is None:
+            _cached = TextSentimentAnalyzer()
+            _analyze_emotion_deep._analyzer = _cached
+        return _cached.analyze(text)
     except Exception:
         emotion = _quick_emotion(text)
         return {"emotion": emotion, "confidence": 0.6}

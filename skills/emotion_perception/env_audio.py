@@ -1,5 +1,3 @@
-import os
-PROJECT_ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 """
 env_audio.py - Environment audio classification for v3 architecture.
 
@@ -11,6 +9,9 @@ Design goals:
 """
 
 from __future__ import annotations
+
+import os
+PROJECT_ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 import math
 import os

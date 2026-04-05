@@ -36,12 +36,9 @@ class SemanticGuard:
     def _load(self):
         """加载嵌入模型和分类器"""
         try:
-            from sentence_transformers import SentenceTransformer
-            if os.path.exists(BGE_MODEL_DIR):
-                self._embedder = SentenceTransformer(BGE_MODEL_DIR)
-            else:
-                self._embedder = SentenceTransformer("BAAI/bge-large-zh-v1.5")
-            print(f"[SemanticGuard] embedder loaded")
+            from skills.shared.embedder_singleton import get_shared_embedder
+            self._embedder = get_shared_embedder()
+            print(f"[SemanticGuard] embedder loaded (shared)")
         except Exception as e:
             print(f"[SemanticGuard] embedder failed: {e}")
             return

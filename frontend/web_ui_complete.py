@@ -72,20 +72,22 @@ perception = PerceptionEngineV2({
 })
 proactive = ProactiveEngineV2(check_interval=180)
 
-# SSE 推送队列
+# SSE 推送队列（线程安全）
+_sse_lock = threading.Lock()
 sse_clients = []
 
 def broadcast_sse(data: dict):
-    """向所有连接的前端推送消息"""
+    """向所有连接的前端推送消息（线程安全）"""
     msg = f"data: {json.dumps(data, ensure_ascii=False)}\n\n"
-    dead = []
-    for q in sse_clients:
-        try:
-            q.put_nowait(msg)
-        except Exception:
-            dead.append(q)
-    for q in dead:
-        sse_clients.remove(q)
+    with _sse_lock:
+        dead = []
+        for q in sse_clients:
+            try:
+                q.put_nowait(msg)
+            except Exception:
+                dead.append(q)
+        for q in dead:
+            sse_clients.remove(q)
 
 # ============================================================
 # 主动对话后台线程
@@ -194,7 +196,8 @@ def upload_voice():
 @app.route('/events/stream')
 def event_stream():
     q = queue.Queue()
-    sse_clients.append(q)
+    with _sse_lock:
+        sse_clients.append(q)
     def generate():
         try:
             while True:
@@ -204,8 +207,9 @@ def event_stream():
                 except queue.Empty:
                     yield f"data: {json.dumps({'type': 'heartbeat'})}\n\n"
         except GeneratorExit:
-            if q in sse_clients:
-                sse_clients.remove(q)
+            with _sse_lock:
+                if q in sse_clients:
+                    sse_clients.remove(q)
     return Response(generate(), mimetype='text/event-stream',
                     headers={'Cache-Control': 'no-cache', 'X-Accel-Buffering': 'no'})
 
@@ -389,6 +393,33 @@ def demo_force_check():
 # ============================================================
 # 启动
 # ============================================================
+
+
+# ============================================================
+# 优雅退出：保存记忆
+# ============================================================
+import atexit
+import signal
+
+def _shutdown_cleanup():
+    """进程退出时保存 FAISS 记忆到磁盘"""
+    try:
+        from skills.memory.conversation_memory import get_memory
+        mem = get_memory()
+        if mem:
+            mem.save()
+            print("[WebUI] memory saved on shutdown")
+    except Exception as e:
+        print(f"[WebUI] shutdown save error: {e}")
+
+atexit.register(_shutdown_cleanup)
+
+def _signal_handler(sig, frame):
+    print("\n[WebUI] Ctrl+C received, saving and exiting...")
+    _shutdown_cleanup()
+    raise SystemExit(0)
+
+signal.signal(signal.SIGINT, _signal_handler)
 
 if __name__ == '__main__':
     print("=" * 60)

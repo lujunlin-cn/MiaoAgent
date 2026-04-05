@@ -1,5 +1,3 @@
-import os
-PROJECT_ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 """
 voice_emotion.py - Voice emotion perception for v3 architecture.
 
@@ -15,6 +13,8 @@ Design goals:
 from __future__ import annotations
 
 import os
+PROJECT_ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+
 import re
 import tempfile
 import time

@@ -23,10 +23,6 @@ class PiperTTS:
         if model_path is None:
             _root = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
             model_path = os.path.join(_root, "models", "piper", "zh_CN-huayan-medium.onnx")
-        # 默认模型路径
-        if model_path is None:
-            _root = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-            model_path = os.path.join(_root, "models", "piper", "zh_CN-huayan-medium.onnx")
         self.model_path = model_path
         self.output_dir = output_dir
         self.auto_play = auto_play
