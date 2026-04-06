@@ -240,18 +240,6 @@ def inject_via_api(scenario_name: str, host: str = "127.0.0.1", port: int = 5000
 
     # 注入完成后触发主动检查
     print(f"\n[Demo] 触发主动对话检查...")
-    try:
-        resp = requests.post(f"{base_url}/demo/force_check", timeout=30)
-        data = resp.json()
-        if data.get("should_speak"):
-            print(f"  咪酱说: {data.get('reply', '')[:80]}...")
-        else:
-            print(f"  未触发主动对话: {data.get('speak_reason', '')}")
-    except Exception as e:
-        print(f"  force_check failed: {e}")
-
-    return True
-
 
 def list_scenarios():
     """列出所有可用场景"""
