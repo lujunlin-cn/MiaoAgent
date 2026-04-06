@@ -1,69 +1,169 @@
-# ============================================================
-# sandbox-policy.yaml — MiaoAgent NemoClaw 沙箱网络策略
-#
-# 用途：声明沙箱的出站白名单。未列出的目标被内核级拦截。
-#
-# 部署：
-#   openshell sandbox create \
-#       --name miaoagent \
-#       --policy sandbox-policy.yaml \
-#       --gpu \
-#       --mount /opt/catagent:/sandbox/catagent \
-#       -- python3 /sandbox/catagent/frontend/web_ui_complete.py
-# ============================================================
-
+version: 1
+filesystem_policy:
+  include_workdir: true
+  read_only:
+  - /usr
+  - /lib
+  - /proc
+  - /dev/urandom
+  - /app
+  - /etc
+  - /var/log
+  read_write:
+  - /sandbox
+  - /tmp
+  - /dev/null
+landlock:
+  compatibility: best_effort
+process:
+  run_as_user: sandbox
+  run_as_group: sandbox
 network_policies:
-
-  # ----------------------------------------------------------
-  # 推理模型 — Phi-4 融合裁判（直连宿主机 TRT-LLM）
-  # Qwen3 走 inference.local 安全路由，不需要白名单
-  # ----------------------------------------------------------
-  - name: allow-phi4-vision
-    egress:
-      - to:
-          - host: "host.openshell.internal"
-            port: 8356
-        protocols:
-          - TCP
-
-  # ----------------------------------------------------------
-  # Issue #326 Workaround（可选）
-  # 如果 inference.local 不可达，取消下面注释让 Qwen3 也走白名单
-  # 同时设置 ENGINE=nemoclaw_whitelist
-  # ----------------------------------------------------------
-  # - name: allow-qwen3-whitelist
-  #   egress:
-  #     - to:
-  #         - host: "host.openshell.internal"
-  #           port: 8355
-  #       protocols:
-  #         - TCP
-
-  # ----------------------------------------------------------
-  # Web UI — Flask 服务端口
-  # ----------------------------------------------------------
-  - name: allow-web-ui
-    egress:
-      - to:
-          - host: "host.openshell.internal"
-            port: 5000
-        protocols:
-          - TCP
-
-  # ----------------------------------------------------------
-  # 社交消息桥接（微信 iPad 协议 + QQ NapCat）
-  # 只允许读取，沙箱无法直连微信/QQ 服务器
-  # ----------------------------------------------------------
-  - name: allow-social-readers
-    egress:
-      - to:
-          - host: "host.openshell.internal"
-            port: 8099    # wechat-service (iPad 协议)
-          - host: "host.openshell.internal"
-            port: 6099    # NapCat QQ (OneBot v11)
-        protocols:
-          - TCP
-
-  # ----------------------------------------------------------
-  # ✗ 其他所有出站请求 — 被内核级拦截
-  # ----------------------------------------------------------
+  claude_code:
+    name: claude_code
+    endpoints:
+    - host: api.anthropic.com
+      port: 443
+      protocol: rest
+      tls: terminate
+      enforcement: enforce
+      rules:
+      - allow:
+          method: '*'
+          path: /**
+    - host: statsig.anthropic.com
+      port: 443
+      rules:
+      - allow:
+          method: '*'
+          path: /**
+    - host: sentry.io
+      port: 443
+      rules:
+      - allow:
+          method: '*'
+          path: /**
+    binaries:
+    - path: /usr/local/bin/claude
+  clawhub:
+    name: clawhub
+    endpoints:
+    - host: clawhub.com
+      port: 443
+      protocol: rest
+      tls: terminate
+      enforcement: enforce
+      rules:
+      - allow:
+          method: GET
+          path: /**
+      - allow:
+          method: POST
+          path: /**
+    binaries:
+    - path: /usr/local/bin/openclaw
+  github:
+    name: github
+    endpoints:
+    - host: github.com
+      port: 443
+      access: full
+    - host: api.github.com
+      port: 443
+      access: full
+    binaries:
+    - path: /usr/bin/gh
+    - path: /usr/bin/git
+  npm_registry:
+    name: npm_registry
+    endpoints:
+    - host: registry.npmjs.org
+      port: 443
+      access: full
+    binaries:
+    - path: /usr/local/bin/openclaw
+    - path: /usr/local/bin/npm
+  nvidia:
+    name: nvidia
+    endpoints:
+    - host: integrate.api.nvidia.com
+      port: 443
+      protocol: rest
+      tls: terminate
+      enforcement: enforce
+      rules:
+      - allow:
+          method: '*'
+          path: /**
+    - host: inference-api.nvidia.com
+      port: 443
+      protocol: rest
+      tls: terminate
+      enforcement: enforce
+      rules:
+      - allow:
+          method: '*'
+          path: /**
+    binaries:
+    - path: /usr/local/bin/claude
+    - path: /usr/local/bin/openclaw
+  openclaw_api:
+    name: openclaw_api
+    endpoints:
+    - host: openclaw.ai
+      port: 443
+      protocol: rest
+      tls: terminate
+      enforcement: enforce
+      rules:
+      - allow:
+          method: GET
+          path: /**
+      - allow:
+          method: POST
+          path: /**
+    binaries:
+    - path: /usr/local/bin/openclaw
+  openclaw_docs:
+    name: openclaw_docs
+    endpoints:
+    - host: docs.openclaw.ai
+      port: 443
+      protocol: rest
+      tls: terminate
+      enforcement: enforce
+      rules:
+      - allow:
+          method: GET
+          path: /**
+    binaries:
+    - path: /usr/local/bin/openclaw
+  telegram:
+    name: telegram
+    endpoints:
+    - host: api.telegram.org
+      port: 443
+      protocol: rest
+      tls: terminate
+      enforcement: enforce
+      rules:
+      - allow:
+          method: GET
+          path: /bot*/**
+      - allow:
+          method: POST
+          path: /bot*/**
+  trtllm_qwen3:
+    name: trtllm_qwen3
+    endpoints:
+    - host: host.openshell.internal
+      port: 8355
+    binaries:
+    - path: /usr/bin/curl
+  trtllm_phi4:
+    name: trtllm_phi4
+    endpoints:
+    - host: host.openshell.internal
+      port: 8356
+    binaries:
+    - path: /usr/bin/curl

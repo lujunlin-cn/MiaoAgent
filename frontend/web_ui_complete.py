@@ -94,9 +94,9 @@ def broadcast_sse(data: dict):
 # ============================================================
 
 def proactive_watcher():
-    """每 3 分钟检查一次，有主动对话则推送到前端"""
+    """每 3 分钟检查一次，有主动对话则推送到前端(为了方便演示此处修改为30秒)"""
     while True:
-        time.sleep(180)
+        time.sleep(30)
         try:
             decision = proactive.force_check()
             if decision.get("should_speak"):
