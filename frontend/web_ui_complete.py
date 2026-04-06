@@ -8,6 +8,8 @@ web_ui.py — MiaoAgent 完全体（Web 版）
 - 主动对话引擎（SSE 推送到前端）
 - 摄像头 DeepFace 表情检测
 - DistilBERT 文字情感 + 表情驱动
+- emotion2vec 语音情绪分析
+- PANNs 环境音分类
 - Piper TTS 本地语音
 - Whisper 语音识别
 - 感知事件注入（Demo 演示用）
@@ -173,6 +175,7 @@ def upload_voice():
 
     store.mark_user_interaction()
     perception.analyze_user_text(recognized_text)
+    perception.analyze_voice_audio(save_path)  # emotion2vec + PANNs（后台线程）
 
     response = persona.respond(user_message=recognized_text)
     bot_reply = response["text"]
@@ -427,6 +430,7 @@ if __name__ == '__main__':
     print(f"  Chat:  {CHAT_MODEL} @ {CHAT_URL}")
     print(f"  Judge: {JUDGE_MODEL} @ {JUDGE_URL}")
     print("  TTS:   Piper (local)  |  Guard: Semantic + Regex")
+    print("  Voice: emotion2vec + PANNs (on voice upload)")
     print("  Memory: FAISS long-term")
     print(f"  Social: {SOCIAL_BRIDGE_MODE}")
     print("=" * 60)

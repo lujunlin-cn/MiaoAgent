@@ -6,7 +6,10 @@ perception_v2.py — 轻量感知引擎（架构更新版）
 - 文字情感：Gemma-3 兼任 → 轻量 transformers 模型 (CPU, <10ms)
 - Gemma-3 只保留：融合裁判(3min) + 猫咪对话生成
 
-这样 Gemma-3 的调用频率从每10秒降到每3分钟，并发冲突消除
+v3.3 新增：
+- 语音情绪：emotion2vec（CPU，邱靖翔开发的 voice_emotion 模块）
+- 环境音分类：PANNs（CPU，邱靖翔开发的 env_audio 模块）
+- 两个模块通过 /upload_voice 接口接入，分析用户上传的语音
 """
 import cv2
 import os
@@ -223,7 +226,7 @@ class BehaviorDetector:
         if sed_min > 120:
             return f"sedentary for {sed_min:.0f} min (over 2 hours)"
         if 1 <= hour <= 5:
-            return "late night (1-5 AM), still at computer"
+            return f"late night (1-5 AM), still at computer"
         if hour >= 23:
             return "near midnight, still active"
 
@@ -281,6 +284,80 @@ class ResponseEmotionDetector:
 
 
 # ============================================================
+# 模块 E: 语音情绪分析（emotion2vec，邱靖翔开发）
+# ============================================================
+
+class VoiceEmotionAdapter:
+    """延迟加载 voice_emotion 模块，分析语音音频中的情绪"""
+
+    def __init__(self):
+        self._detector = None
+        self._available = None  # None = 未检测, True/False = 已检测
+
+    def _load(self):
+        if self._available is not None:
+            return self._available
+        try:
+            from skills.emotion_perception.voice_emotion import VoiceEmotionDetector
+            self._detector = VoiceEmotionDetector()
+            self._available = True
+            print("[VoiceEmotionAdapter] emotion2vec ready")
+        except Exception as e:
+            self._available = False
+            print(f"[VoiceEmotionAdapter] unavailable: {e}")
+        return self._available
+
+    def analyze(self, audio_path: str):
+        """分析音频文件的语音情绪，结果自动写入 EventStore"""
+        if not self._load():
+            return None
+        try:
+            result = self._detector.analyze_and_store(audio_path)
+            print(f"[VoiceEmotion] {result.mapped_emotion} ({result.confidence:.2f}) via {result.backend}")
+            return result
+        except Exception as e:
+            print(f"[VoiceEmotion] analyze error: {e}")
+            return None
+
+
+# ============================================================
+# 模块 F: 环境音分类（PANNs，邱靖翔开发）
+# ============================================================
+
+class EnvAudioAdapter:
+    """延迟加载 env_audio 模块，分析环境底噪"""
+
+    def __init__(self):
+        self._detector = None
+        self._available = None
+
+    def _load(self):
+        if self._available is not None:
+            return self._available
+        try:
+            from skills.emotion_perception.env_audio import EnvAudioDetector
+            self._detector = EnvAudioDetector()
+            self._available = True
+            print("[EnvAudioAdapter] PANNs ready")
+        except Exception as e:
+            self._available = False
+            print(f"[EnvAudioAdapter] unavailable: {e}")
+        return self._available
+
+    def analyze(self, audio_path: str):
+        """分析音频文件的环境音，结果自动写入 EventStore"""
+        if not self._load():
+            return None
+        try:
+            result = self._detector.analyze_and_store(audio_path)
+            print(f"[EnvAudio] {result.labels[0] if result.labels else '?'} ({result.confidence:.2f}) via {result.backend}")
+            return result
+        except Exception as e:
+            print(f"[EnvAudio] analyze error: {e}")
+            return None
+
+
+# ============================================================
 # 整合：感知引擎主类 V2
 # ============================================================
 
@@ -289,7 +366,10 @@ class PerceptionEngineV2:
     
     - 摄像头用 DeepFace（CPU）
     - 文字情感用轻量 transformers（CPU）
-    - Gemma-3 完全解放，只做融合裁判和对话
+    - 语音情绪用 emotion2vec（CPU）
+    - 环境音用 PANNs（CPU）
+    - Qwen3 完全解放，只做对话
+    - Phi-4 只做融合裁判
     """
 
     def __init__(self, config=None):
@@ -301,6 +381,8 @@ class PerceptionEngineV2:
         self.text_sentiment = TextSentimentAnalyzer()
         self.behavior = BehaviorDetector()
         self.response_emotion = ResponseEmotionDetector(self.text_sentiment)
+        self.voice_emotion = VoiceEmotionAdapter()
+        self.env_audio = EnvAudioAdapter()
 
         self.channels = {
             "camera": config.get("enable_camera", False),
@@ -336,6 +418,18 @@ class PerceptionEngineV2:
                 emotion=result["emotion"],
                 confidence=result["confidence"]
             )
+
+    def analyze_voice_audio(self, audio_path: str):
+        """分析用户上传的语音音频（emotion2vec + PANNs）
+        
+        在后台线程中运行，不阻塞主请求。
+        结果自动写入 EventStore，供融合裁判使用。
+        """
+        def _run():
+            self.voice_emotion.analyze(audio_path)
+            self.env_audio.analyze(audio_path)
+
+        threading.Thread(target=_run, daemon=True).start()
 
     def get_cat_state_for_response(self, response_text: str) -> str:
         """根据猫咪回复文字决定表情状态"""
