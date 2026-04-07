@@ -34,8 +34,8 @@ echo "[3/6] 启动 OpenShell gateway..."
 GATEWAY_ID=$(sudo docker ps -aq --filter name=openshell)
 if [ -n "$GATEWAY_ID" ]; then
     sudo docker start "$GATEWAY_ID"
-    echo "  等待 gateway 内部服务就绪（60s）..."
-    sleep 60
+    echo "  等待 gateway 内部服务就绪（120s）..."
+    sleep 120
     sudo openshell status
 else
     echo "  ⚠️ 未找到 openshell 容器，可能需要重新安装 OpenShell"
