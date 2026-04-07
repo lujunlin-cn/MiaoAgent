@@ -14,7 +14,13 @@ web_ui.py — MiaoAgent 完全体（Web 版）
 - Whisper 语音识别
 - 感知事件注入（Demo 演示用）
 
-启动：python3 frontend/web_ui.py
+启动（沙箱外开发）：
+  python3 frontend/web_ui.py
+
+启动（NemoClaw 沙箱内）：
+  export MIAOAGENT_ENGINE=nemoclaw
+  python3 frontend/web_ui.py
+
 访问：http://127.0.0.1:5000
 """
 import sys
@@ -36,9 +42,9 @@ except (OSError, ImportError, ModuleNotFoundError):
 from flask import Flask, render_template, request, jsonify, send_file, Response
 from skills.tts.piper_tts import PiperTTS
 from skills.audio.realtime_asr import transcribe_audio
-from skills.companion_persona.persona_v2 import CompanionPersonaV2
-from skills.emotion_perception.perception_v2 import PerceptionEngineV2
-from skills.proactive_engine.engine_v2 import ProactiveEngineV2
+from skills.companion_persona.persona import CompanionPersonaV2
+from skills.emotion_perception.perception import PerceptionEngineV2
+from skills.proactive_engine.engine import ProactiveEngineV2
 from skills.shared.event_store import store
 from skills.shared.inference_config import ENGINE, CHAT_MODEL, CHAT_URL, JUDGE_MODEL, JUDGE_URL
 
@@ -247,6 +253,7 @@ def status():
         "memory_count": memory_stats.get("count", 0),
         "camera": perception.channels.get("camera", False),
         "social_bridge": _social_bridge.stats() if _social_bridge else {"mode": "off"},
+        "engine": ENGINE,
     })
 
 # ============================================================
@@ -394,11 +401,6 @@ def demo_force_check():
     return jsonify(decision)
 
 # ============================================================
-# 启动
-# ============================================================
-
-
-# ============================================================
 # 优雅退出：保存记忆
 # ============================================================
 import atexit
@@ -424,6 +426,10 @@ def _signal_handler(sig, frame):
 
 signal.signal(signal.SIGINT, _signal_handler)
 
+# ============================================================
+# 启动
+# ============================================================
+
 if __name__ == '__main__':
     print("=" * 60)
     print(f"  MiaoAgent Web UI — Engine: {ENGINE}")
@@ -440,8 +446,6 @@ if __name__ == '__main__':
     print("[WebUI] Perception started")
 
     # 启动主动对话引擎（后台线程，含 SSE 推送）
-    # 注意：不调 proactive.start()，因为 proactive_watcher 已经每 180s
-    # 调用 force_check() 并处理 SSE 推送，再 start() 会导致双重检查
     threading.Thread(target=proactive_watcher, daemon=True).start()
     print("[WebUI] Proactive engine started (SSE push enabled)")
 
@@ -455,7 +459,11 @@ if __name__ == '__main__':
 
     print()
     print("[WebUI] Access: http://127.0.0.1:5000")
-    print("[WebUI] Remote:  ssh -L 5000:127.0.0.1:5000 user@spark")
+    if ENGINE == "trtllm":
+        print("[WebUI] Remote:  ssh -L 5000:127.0.0.1:5000 user@spark")
+    elif ENGINE in ("nemoclaw", "nemoclaw_whitelist"):
+        print("[WebUI] ⚠️  Running inside NemoClaw sandbox")
+        print("[WebUI] Remote:  先 ssh 到 DGX Spark，再 nemoclaw connect 进沙箱")
     print()
     print("[WebUI] Demo APIs:")
     print("  POST /demo/inject       注入测试事件")

@@ -4,8 +4,10 @@ inference_config.py — 推理引擎配置
 集中管理所有模型 URL 和名称，切换引擎只改 ENGINE 变量。
 
 引擎选项：
-  trtllm              宿主机直连 TRT-LLM（当前默认，沙箱外开发用）
-  nemoclaw             Qwen3 走 inference.local 安全路由，Phi-4 走白名单直连
+  trtllm              宿主机直连 TRT-LLM（沙箱外开发/调试用）
+  nemoclaw             NemoClaw 沙箱模式（生产部署）
+                       Qwen3 走 inference.local 安全路由
+                       Phi-4 走白名单直连 host.openshell.internal
   nemoclaw_whitelist   两个模型都走白名单直连（Issue #326 workaround）
   ollama               Ollama 后端（调试用）
 
@@ -26,25 +28,27 @@ ENGINE = os.environ.get("MIAOAGENT_ENGINE", "trtllm")
 # ============================================================
 
 if ENGINE == "nemoclaw":
-    # ---- 方案 A：Qwen3 走 inference.local 安全路由 ----
-    # OpenShell 隐私路由器自动注入后端凭证，沙箱代码不接触真实地址
+    # ---- 生产模式：沙箱内运行 ----
+    # Qwen3 走 OpenShell inference.local 安全路由
+    # gateway 自动注入后端凭证，沙箱代码不接触真实地址
     CHAT_URL = "https://inference.local"
     CHAT_MODEL = "qwen3-30B"
     CHAT_API_KEY = "unused"           # OpenShell 会替换为真实凭证
     CHAT_VERIFY_SSL = False           # inference.local 使用内部证书
 
-    # Phi-4 走 localhost 直连（沙箱内可达，仍在 NemoClaw 内核级隔离内）
-    # inference.local 只支持一个活跃路由，所以 Phi-4 不走安全路由
-    JUDGE_URL = "http://localhost:8356"
+    # Phi-4 走网络白名单直连（sandbox-policy.yaml 放行 :8356）
+    # 注意：沙箱内 localhost 指向沙箱自己，必须用 host.openshell.internal
+    JUDGE_URL = "http://host.openshell.internal:8356"
     JUDGE_MODEL = "phi4mm"
     JUDGE_API_KEY = "empty"
     JUDGE_VERIFY_SSL = True
-    # 绕过沙箱内部代理（10.200.0.1:3128），否则 inference.local 请求会被 403
-    os.environ["NO_PROXY"] = os.environ.get("NO_PROXY", "") + ",localhost,inference.local"
-    os.environ["no_proxy"] = os.environ.get("no_proxy", "") + ",localhost,inference.local"
+
+    # 绕过沙箱内部代理（10.200.0.1:3128），否则请求会被 403
+    os.environ["NO_PROXY"] = os.environ.get("NO_PROXY", "") + ",localhost,inference.local,host.openshell.internal"
+    os.environ["no_proxy"] = os.environ.get("no_proxy", "") + ",localhost,inference.local,host.openshell.internal"
 
 elif ENGINE == "nemoclaw_whitelist":
-    # ---- 方案 B：Issue #326 Workaround ----
+    # ---- Issue #326 Workaround ----
     # inference.local DNS 不解析时，两个模型都走白名单直连
     # 安全性略降（沙箱代码知道后端地址）但仍有网络策略控制
     CHAT_URL = "http://host.openshell.internal:8355"
@@ -72,7 +76,7 @@ elif ENGINE == "ollama":
     JUDGE_VERIFY_SSL = True
 
 else:
-    # ---- 默认：TRT-LLM 宿主机直连 ----
+    # ---- 默认：TRT-LLM 宿主机直连（沙箱外开发用）----
     ENGINE = "trtllm"
     CHAT_URL = "http://localhost:8355"
     CHAT_MODEL = "qwen3-30B"
@@ -171,8 +175,8 @@ def judge_completion(messages: list, temperature: float = 0.3,
 # 启动时打印当前配置
 # ============================================================
 _engine_labels = {
-    "trtllm": "TRT-LLM 直连",
-    "nemoclaw": "NemoClaw (inference.local + 白名单)",
+    "trtllm": "TRT-LLM 直连（沙箱外开发）",
+    "nemoclaw": "NemoClaw 沙箱（inference.local + 白名单）",
     "nemoclaw_whitelist": "NemoClaw 白名单模式 (Issue #326 workaround)",
     "ollama": "Ollama",
 }

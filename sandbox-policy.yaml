@@ -1,169 +1,54 @@
+# ============================================================
+# MiaoAgent NemoClaw 沙箱网络策略
+# ============================================================
+# 核心原则：数据不出端，仅允许本地推理服务通信
+#
+# 路由设计：
+#   Qwen3-30B（对话核心）→ OpenShell 推理路由（inference.local）
+#     通过 openshell inference set 注册，gateway 自动代理
+#     无需网络白名单，沙箱内经 inference.local 路由到宿主机 :8355
+#
+#   Phi-4-multimodal（裁判引擎）→ 网络白名单直连
+#     sandbox-policy.yaml 放行 host.openshell.internal:8356
+#     沙箱内代码使用 http://host.openshell.internal:8356 访问
+#
+# 除上述端点外，所有外部网络请求均被 NemoClaw 内核级拦截
+# ============================================================
+
 version: 1
+
 filesystem_policy:
   include_workdir: true
   read_only:
-  - /usr
-  - /lib
-  - /proc
-  - /dev/urandom
-  - /app
-  - /etc
-  - /var/log
+    - /usr
+    - /lib
+    - /proc
+    - /dev/urandom
+    - /app
+    - /etc
+    - /var/log
   read_write:
-  - /sandbox
-  - /tmp
-  - /dev/null
-landlock:
-  compatibility: best_effort
+    - /sandbox
+    - /tmp
+    - /dev/null
+  landlock:
+    compatibility: best_effort
+
 process:
   run_as_user: sandbox
   run_as_group: sandbox
+
+# ============================================================
+# 网络策略
+# Qwen3 走推理路由（inference.local），不需要网络白名单
+# Phi-4 走白名单直连 host.openshell.internal:8356
+# ============================================================
 network_policies:
-  claude_code:
-    name: claude_code
-    endpoints:
-    - host: api.anthropic.com
-      port: 443
-      protocol: rest
-      tls: terminate
-      enforcement: enforce
-      rules:
-      - allow:
-          method: '*'
-          path: /**
-    - host: statsig.anthropic.com
-      port: 443
-      rules:
-      - allow:
-          method: '*'
-          path: /**
-    - host: sentry.io
-      port: 443
-      rules:
-      - allow:
-          method: '*'
-          path: /**
-    binaries:
-    - path: /usr/local/bin/claude
-  clawhub:
-    name: clawhub
-    endpoints:
-    - host: clawhub.com
-      port: 443
-      protocol: rest
-      tls: terminate
-      enforcement: enforce
-      rules:
-      - allow:
-          method: GET
-          path: /**
-      - allow:
-          method: POST
-          path: /**
-    binaries:
-    - path: /usr/local/bin/openclaw
-  github:
-    name: github
-    endpoints:
-    - host: github.com
-      port: 443
-      access: full
-    - host: api.github.com
-      port: 443
-      access: full
-    binaries:
-    - path: /usr/bin/gh
-    - path: /usr/bin/git
-  npm_registry:
-    name: npm_registry
-    endpoints:
-    - host: registry.npmjs.org
-      port: 443
-      access: full
-    binaries:
-    - path: /usr/local/bin/openclaw
-    - path: /usr/local/bin/npm
-  nvidia:
-    name: nvidia
-    endpoints:
-    - host: integrate.api.nvidia.com
-      port: 443
-      protocol: rest
-      tls: terminate
-      enforcement: enforce
-      rules:
-      - allow:
-          method: '*'
-          path: /**
-    - host: inference-api.nvidia.com
-      port: 443
-      protocol: rest
-      tls: terminate
-      enforcement: enforce
-      rules:
-      - allow:
-          method: '*'
-          path: /**
-    binaries:
-    - path: /usr/local/bin/claude
-    - path: /usr/local/bin/openclaw
-  openclaw_api:
-    name: openclaw_api
-    endpoints:
-    - host: openclaw.ai
-      port: 443
-      protocol: rest
-      tls: terminate
-      enforcement: enforce
-      rules:
-      - allow:
-          method: GET
-          path: /**
-      - allow:
-          method: POST
-          path: /**
-    binaries:
-    - path: /usr/local/bin/openclaw
-  openclaw_docs:
-    name: openclaw_docs
-    endpoints:
-    - host: docs.openclaw.ai
-      port: 443
-      protocol: rest
-      tls: terminate
-      enforcement: enforce
-      rules:
-      - allow:
-          method: GET
-          path: /**
-    binaries:
-    - path: /usr/local/bin/openclaw
-  telegram:
-    name: telegram
-    endpoints:
-    - host: api.telegram.org
-      port: 443
-      protocol: rest
-      tls: terminate
-      enforcement: enforce
-      rules:
-      - allow:
-          method: GET
-          path: /bot*/**
-      - allow:
-          method: POST
-          path: /bot*/**
-  trtllm_qwen3:
-    name: trtllm_qwen3
-    endpoints:
-    - host: host.openshell.internal
-      port: 8355
-    binaries:
-    - path: /usr/bin/curl
   trtllm_phi4:
     name: trtllm_phi4
     endpoints:
-    - host: host.openshell.internal
-      port: 8356
+      - host: host.openshell.internal
+        port: 8356
     binaries:
-    - path: /usr/bin/curl
+      - path: /usr/bin/curl
+      - path: /usr/bin/python3
