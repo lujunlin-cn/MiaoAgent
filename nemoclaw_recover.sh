@@ -56,7 +56,7 @@ sudo openshell provider create \
 
 sudo openshell inference set \
     --provider trtllm-qwen3 \
-    --model qwen3 \
+    --model qwen3-30B \
     --no-verify \
     2>/dev/null && echo "  ✅ qwen3 推理路由已注册" \
     || echo "  ℹ️ qwen3 推理路由已存在"
